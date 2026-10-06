@@ -1,0 +1,323 @@
+:root {
+  --paper: #f3eee6;
+  --ink: #1e1a16;
+  --muted: #6d655c;
+  --line: #e4d9cb;
+  --card: #fffdf9;
+  --accent: #8d3b2b;
+  --accent-ink: #fff8f4;
+  --mark: #f6d98a;
+  --shadow: 0 10px 30px rgba(60, 40, 20, 0.06);
+  --sans: "IBM Plex Sans KR", "Malgun Gothic", sans-serif;
+  --serif: "Source Serif 4", "Batang", serif;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.7), transparent 42%),
+    var(--paper);
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  border: 1px solid var(--line);
+  background: var(--card);
+  border-radius: 999px;
+  padding: 0.55rem 1rem;
+  cursor: pointer;
+}
+
+button.primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
+
+button.text-button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 0;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.app {
+  width: min(720px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding-bottom: 4rem;
+}
+
+.top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.4rem 0 1rem;
+  position: sticky;
+  top: 0;
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+.top h1 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 1.7rem;
+  font-weight: 600;
+}
+
+.top nav {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.top nav a {
+  color: var(--muted);
+}
+
+.top nav a.active {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.stack {
+  display: grid;
+  gap: 1.4rem;
+}
+
+h2 {
+  margin: 0 0 0.7rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.panel,
+.quote,
+.book-list a {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+}
+
+.panel {
+  padding: 1rem;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.field span,
+.quote-edit label {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+input,
+textarea,
+button {
+  scroll-margin-top: 5.5rem;
+}
+
+input,
+textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 12px;
+  padding: 0.7rem 0.8rem;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.hint,
+.status,
+.empty {
+  margin: 0;
+  color: var(--muted);
+}
+
+.book-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.book-list a {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.15rem 0.8rem;
+  padding: 0.9rem 1rem;
+  color: inherit;
+}
+
+.book-list strong {
+  font-family: var(--serif);
+  font-size: 1.08rem;
+}
+
+.book-list span {
+  grid-column: 1;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.book-list em {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  align-self: center;
+  font-style: normal;
+  color: var(--accent);
+}
+
+.quote-list {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.quote {
+  padding: 1rem;
+}
+
+.quote-text {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 1.08rem;
+  line-height: 1.75;
+  white-space: pre-wrap;
+}
+
+.quote-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1rem;
+  margin: 0.7rem 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.quote-edit {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.quote-edit label {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.note-hit {
+  margin: 0.7rem 0 0;
+  color: var(--muted);
+}
+
+.quote-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.7rem;
+}
+
+.drag-handle {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: grab;
+  touch-action: none;
+  letter-spacing: -0.14em;
+  padding: 0.2rem 0.35rem;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+/* sticky로 띄우면 문구 위를 덮어 드래그 손잡이를 집을 수 없다 */
+.move-tray {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.7rem 0 0.2rem;
+  background: color-mix(in srgb, var(--paper) 94%, transparent);
+}
+
+.move-list {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.move-target {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.8rem 1rem;
+  border: 1px dashed var(--line);
+  border-radius: 16px;
+  background: var(--card);
+}
+
+.move-target span {
+  color: var(--muted);
+}
+
+.move-target.over {
+  border-color: var(--accent);
+  background: #f8ebe6;
+}
+
+mark {
+  background: var(--mark);
+  color: inherit;
+  border-radius: 4px;
+  padding: 0 0.1em;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.back {
+  font-size: 0.9rem;
+}
+
+@media (max-width: 640px) {
+  .top {
+    align-items: center;
+  }
+
+  .top h1 {
+    font-size: 1.4rem;
+  }
+}
