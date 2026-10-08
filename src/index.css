@@ -344,12 +344,17 @@ textarea {
   color: #b33927;
 }
 
+/* touch-action: none이 아니라 manipulation이다.
+   none이면 손잡이 위에서는 브라우저가 스크롤을 아예 거부해서,
+   TouchSensor의 0.2초 지연이 아무 쓸모가 없어진다.
+   manipulation이면 0.2초 안에 손가락을 움직이면 페이지가 스크롤되고,
+   가만히 누르고 있으면 dnd-kit이 그때부터 스크롤을 막고 드래그를 잡는다. */
 .drag-handle {
   border: 0;
   background: transparent;
   color: var(--muted);
   cursor: grab;
-  touch-action: none;
+  touch-action: manipulation;
   letter-spacing: -0.14em;
   padding: 0.4rem 0.7rem;
   min-height: 44px;

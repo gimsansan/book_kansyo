@@ -246,10 +246,117 @@ export function exportJson() {
   return JSON.stringify(snapshot, null, 2)
 }
 
-export function importJson(json) {
+function parseBackup(json) {
   const data = JSON.parse(json)
   if (!data || !Array.isArray(data.books) || !Array.isArray(data.quotes)) {
     throw new Error('백업 형식이 아닙니다.')
   }
+  return data
+}
+
+// 가져오기 뒤에는 목업이 아니다.
+// 플래그를 내리지 않으면 홈에 목업 상자가 남고, 거기서 '다시 섞기'를 누르면
+// 방금 가져온 데이터가 목업으로 덮인다.
+function dropMockFlag() {
+  if (typeof localStorage === 'undefined') return
+  localStorage.setItem(MOCK_FLAG, 'off')
+}
+
+// 통째로 갈아끼운다. 백업 복원용.
+export function importJson(json) {
+  const data = parseBackup(json)
   emit({ books: data.books, quotes: data.quotes })
+  dropMockFlag()
+}
+
+function bookKey(title, author) {
+  return `${String(title ?? '').trim()}
+${String(author ?? '').trim()}`
+}
+
+function textKey(bookId, text) {
+  return `${bookId}
+${String(text ?? '').trim()}`
+}
+
+// 가져온 데이터를 지금 데이터에 얹는다. 있는 것은 건드리지 않는다.
+//
+// 기기마다 id를 따로 만들기 때문에(crypto.randomUUID), 같은 책이라도
+// 양쪽 id가 다르다. 그래서 id가 같거나 제목·저자가 같으면 같은 책으로 본다.
+// 문구는 id가 겹치거나 같은 책에 같은 본문이 이미 있으면 건너뛴다.
+// 겹칠 때는 언제나 이 기기의 것을 남긴다.
+export function mergeJson(json) {
+  const data = parseBackup(json)
+  const books = snapshot.books.map((book) => ({ ...book }))
+  const quotes = snapshot.quotes.map((quote) => ({ ...quote }))
+
+  const byId = new Map(books.map((book) => [book.id, book]))
+  const byName = new Map(books.map((book) => [bookKey(book.title, book.author), book]))
+  const quoteIds = new Set(quotes.map((quote) => quote.id))
+  const seenText = new Set(quotes.map((quote) => textKey(quote.book_id, quote.text)))
+
+  // 책마다 새 문구를 붙일 자리
+  const nextPosition = new Map()
+  for (const quote of quotes) {
+    const used = Number.isFinite(quote.position) ? quote.position + 1 : 0
+    nextPosition.set(quote.book_id, Math.max(nextPosition.get(quote.book_id) ?? 0, used))
+  }
+
+  const report = { books: 0, quotes: 0, skipped: 0 }
+  const resolved = new Map()
+
+  for (const incoming of data.books) {
+    if (!incoming?.id) continue
+    const title = String(incoming.title ?? '').trim()
+    if (!title) continue
+    const author = String(incoming.author ?? '').trim()
+    const mine = byId.get(incoming.id) ?? byName.get(bookKey(title, author))
+    if (mine) {
+      resolved.set(incoming.id, mine)
+      continue
+    }
+    const book = {
+      id: incoming.id,
+      title,
+      author,
+      created_at: incoming.created_at ?? new Date().toISOString(),
+    }
+    books.push(book)
+    byId.set(book.id, book)
+    byName.set(bookKey(title, author), book)
+    resolved.set(incoming.id, book)
+    report.books += 1
+  }
+
+  for (const incoming of data.quotes) {
+    const book = resolved.get(incoming?.book_id)
+    const body = String(incoming?.text ?? '').trim()
+    if (!book || !body || !incoming.id) {
+      report.skipped += 1
+      continue
+    }
+    if (quoteIds.has(incoming.id) || seenText.has(textKey(book.id, body))) {
+      report.skipped += 1
+      continue
+    }
+    const position = nextPosition.get(book.id) ?? 0
+    nextPosition.set(book.id, position + 1)
+    quotes.push({
+      id: incoming.id,
+      book_id: book.id,
+      text: incoming.text,
+      page: incoming.page ?? '',
+      note: incoming.note ?? '',
+      raw: incoming.raw ?? '',
+      position,
+      created_at: incoming.created_at ?? new Date().toISOString(),
+    })
+    quoteIds.add(incoming.id)
+    seenText.add(textKey(book.id, body))
+    report.quotes += 1
+  }
+
+  emit({ books, quotes })
+  dropMockFlag()
+  return report
 }

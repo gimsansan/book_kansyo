@@ -1,6 +1,7 @@
 import {
   DndContext,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   closestCenter,
   useSensor,
   useSensors,
@@ -45,8 +46,15 @@ function SortableQuote({ quote }) {
 
 // 같은 책 안에서 순서만 바꾼다 (다른 책으로 옮기기는 지원하지 않음)
 export default function SortableQuotes({ bookId, quotes }) {
+  // 마우스와 손가락을 따로 둔다.
+  // 마우스는 6px만 움직이면 바로 시작하고,
+  // 손가락은 0.2초 눌러야 시작한다. 그 사이에 8px 넘게 움직이면
+  // 드래그를 포기하고 페이지 스크롤로 넘긴다.
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 8 },
+    }),
   )
 
   function onDragEnd(event) {
