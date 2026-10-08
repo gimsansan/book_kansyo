@@ -4,6 +4,7 @@ import PasteBox from '../components/PasteBox.jsx'
 import QuoteList from '../components/QuoteList.jsx'
 import {
   clearLibrary,
+  getSnapshot,
   listBooks,
   listRecentQuotes,
   loadMock,
@@ -15,6 +16,7 @@ export default function Home() {
   useLibrary()
   const books = listBooks()
   const recent = listRecentQuotes(5)
+  const { quotes } = getSnapshot()
 
   return (
     <div className="stack">
@@ -33,6 +35,9 @@ export default function Home() {
             </button>
           </div>
         </section>
+      )}
+      {books.length > 0 && (
+        <p className="hint stats">책 {books.length}권 · 문구 {quotes.length}개</p>
       )}
       <PasteBox />
       <section>

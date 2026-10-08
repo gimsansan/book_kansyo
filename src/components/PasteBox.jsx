@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { parseShare } from '../lib/parseShare.js'
 import { addQuote } from '../lib/storage.js'
 
-export default function PasteBox({ initialRaw = '', label }) {
+export default function PasteBox({ initialRaw = '', initialDraft = null, label }) {
   const navigate = useNavigate()
   const [raw, setRaw] = useState(initialRaw)
-  const [draft, setDraft] = useState(initialRaw.trim() ? parseShare(initialRaw) : null)
+  const [draft, setDraft] = useState(initialRaw.trim() ? parseShare(initialRaw) : initialDraft)
   const [message, setMessage] = useState('')
 
   useEffect(() => {
@@ -41,15 +41,15 @@ export default function PasteBox({ initialRaw = '', label }) {
       return
     }
     setRaw('')
-    setDraft(null)
+    setDraft(initialDraft ? { ...initialDraft, text: '' } : null)
     setMessage('저장했습니다.')
-    navigate(`/book/${result.book.id}`)
+    if (!initialDraft) navigate(`/book/${result.book.id}`)
   }
 
   return (
     <section className="panel">
       <label className="field">
-        <span>{label ?? '밀리의 서재에서 공유한 문구'}</span>
+        <span>{label ?? '책에서 공유한 문구'}</span>
         <textarea
           value={raw}
           rows={7}

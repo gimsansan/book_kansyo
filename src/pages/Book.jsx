@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import PasteBox from '../components/PasteBox.jsx'
 import SortableQuotes from '../components/SortableQuotes.jsx'
 import {
   deleteBook,
@@ -92,6 +93,10 @@ export default function Book() {
         </div>
         {message && <p className="status">{message}</p>}
       </form>
+      <PasteBox
+        label="이 책에 문구 추가"
+        initialDraft={{ title: book.title, author: book.author, text: '', ok: true }}
+      />
       <h2>문구 {quotes.length}개</h2>
       {quotes.length > 1 && (
         <p className="hint">손잡이를 끌어 이 책 안에서 순서를 바꿉니다.</p>

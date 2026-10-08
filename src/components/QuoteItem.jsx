@@ -5,6 +5,7 @@ import { deleteQuote, updateQuote } from '../lib/storage.js'
 
 function formatDate(value) {
   return new Date(value).toLocaleString('ko-KR', {
+    year: '2-digit',
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
@@ -21,6 +22,7 @@ export default function QuoteItem({
   const [page, setPage] = useState(quote.page || '')
   const [note, setNote] = useState(quote.note || '')
   const [favorite, setFavorite] = useState(quote.favorite || false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const setHandleRef = dragHandle?.setActivatorNodeRef
 
   function savePage() {
@@ -38,7 +40,11 @@ export default function QuoteItem({
   }
 
   function onDelete() {
-    if (window.confirm('이 문구를 삭제할까요?')) deleteQuote(quote.id)
+    if (confirmDelete) {
+      deleteQuote(quote.id)
+    } else {
+      setConfirmDelete(true)
+    }
   }
 
   return (
@@ -103,9 +109,20 @@ export default function QuoteItem({
         >
           {favorite ? '★' : '☆'}
         </button>
-        <button type="button" className="text-button" onClick={onDelete}>
-          삭제
-        </button>
+        {confirmDelete ? (
+          <>
+            <button type="button" className="text-button delete-confirm" onClick={onDelete}>
+              확인
+            </button>
+            <button type="button" className="text-button" onClick={() => setConfirmDelete(false)}>
+              취소
+            </button>
+          </>
+        ) : (
+          <button type="button" className="text-button" onClick={onDelete}>
+            삭제
+          </button>
+        )}
       </div>
     </article>
   )

@@ -137,6 +137,7 @@ export function addQuote({ title, author, text, raw }) {
   const nextTitle = title.trim()
   const nextAuthor = author.trim()
   if (!nextTitle) throw new Error('제목이 필요합니다.')
+  if (!nextAuthor) throw new Error('저자가 필요합니다.')
   const body = text.trim()
   let book = data.books.find(
     (item) => item.title === nextTitle && item.author === nextAuthor,
@@ -206,8 +207,16 @@ export function updateQuote(id, patch) {
 }
 
 export function deleteQuote(id) {
+  const deleted = snapshot.quotes.find((quote) => quote.id === id)
   const quotes = snapshot.quotes.filter((quote) => quote.id !== id)
-  emit({ books: snapshot.books, quotes })
+  const books = deleted
+    ? snapshot.books.filter(
+        (book) =>
+          book.id !== deleted.book_id ||
+          quotes.some((quote) => quote.book_id === book.id),
+      )
+    : snapshot.books
+  emit({ books, quotes })
 }
 
 export function deleteBook(id) {

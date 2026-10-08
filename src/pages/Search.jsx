@@ -15,7 +15,16 @@ export default function Search() {
       {query.trim() ? (
         <>
           <p className="hint">{results.length}개</p>
-          <QuoteList quotes={results} query={query.trim()} showBook />
+          {results.length === 0 ? (
+            <div className="empty-search">
+              <p className="empty">"{query}"에 대한 결과가 없습니다.</p>
+              <button type="button" className="text-button" onClick={() => setQuery('')}>
+                검색어 지우기
+              </button>
+            </div>
+          ) : (
+            <QuoteList quotes={results} query={query.trim()} showBook />
+          )}
         </>
       ) : (
         <p className="empty">검색어를 입력하세요.</p>

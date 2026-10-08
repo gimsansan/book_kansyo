@@ -348,6 +348,11 @@ textarea {
   color: #b33927;
 }
 
+.delete-confirm {
+  color: #b33927;
+  font-weight: 600;
+}
+
 /* touch-action: none이 아니라 manipulation이다.
    none이면 손잡이 위에서는 브라우저가 스크롤을 아예 거부해서,
    TouchSensor의 0.2초 지연이 아무 쓸모가 없어진다.

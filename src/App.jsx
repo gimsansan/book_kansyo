@@ -10,7 +10,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="top">
-        <h1>독서 노트</h1>
+        <h1>독서 수첩</h1>
         <nav>
           <NavLink to="/" end>
             홈
