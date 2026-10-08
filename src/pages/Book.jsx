@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import SortableQuotes from '../components/SortableQuotes.jsx'
 import {
+  deleteBook,
   getBook,
-  listBooks,
   listQuotesByBook,
   updateBook,
 } from '../lib/storage.js'
@@ -15,14 +15,20 @@ export default function Book() {
   const navigate = useNavigate()
   const book = getBook(id)
   const quotes = listQuotesByBook(id)
-  const otherBooks = listBooks().filter((item) => item.id !== id)
   const [title, setTitle] = useState(book?.title ?? '')
   const [author, setAuthor] = useState(book?.author ?? '')
+  const [message, setMessage] = useState('')
 
   useEffect(() => {
     setTitle(book?.title ?? '')
     setAuthor(book?.author ?? '')
   }, [book])
+
+  useEffect(() => {
+    if (!message) return
+    const timer = setTimeout(() => setMessage(''), 3000)
+    return () => clearTimeout(timer)
+  }, [message])
 
   if (!book) {
     return (
@@ -35,8 +41,15 @@ export default function Book() {
 
   function onSaveBook(event) {
     event.preventDefault()
-    const nextId = updateBook(book.id, { title, author })
-    if (nextId !== book.id) navigate(`/book/${nextId}`, { replace: true })
+    const result = updateBook(book.id, { title, author })
+    setMessage(result.ok ? '저장했습니다.' : result.error)
+  }
+
+  function onDeleteBook() {
+    if (window.confirm('이 책과 포함된 문구를 모두 삭제할까요?')) {
+      deleteBook(book.id)
+      navigate('/', { replace: true })
+    }
   }
 
   return (
@@ -47,22 +60,43 @@ export default function Book() {
       <form className="panel book-head" onSubmit={onSaveBook}>
         <label className="field">
           <span>제목</span>
-          <input value={title} onChange={(event) => setTitle(event.target.value)} />
+          <input
+            value={title}
+            onChange={(event) => {
+              setTitle(event.target.value)
+              setMessage('')
+            }}
+          />
         </label>
         <label className="field">
           <span>저자</span>
           <input
             value={author}
-            onChange={(event) => setAuthor(event.target.value)}
+            onChange={(event) => {
+              setAuthor(event.target.value)
+              setMessage('')
+            }}
           />
         </label>
-        <button type="submit">책 정보 저장</button>
+        <div className="book-actions">
+          <button type="submit" disabled={!title.trim()}>
+            책 정보 저장
+          </button>
+          <button
+            type="button"
+            className="text-button delete-book-btn"
+            onClick={onDeleteBook}
+          >
+            책 삭제
+          </button>
+        </div>
+        {message && <p className="status">{message}</p>}
       </form>
       <h2>문구 {quotes.length}개</h2>
       {quotes.length > 1 && (
         <p className="hint">손잡이를 끌어 이 책 안에서 순서를 바꿉니다.</p>
       )}
-      <SortableQuotes bookId={id} quotes={quotes} otherBooks={otherBooks} />
+      <SortableQuotes bookId={id} quotes={quotes} />
     </div>
   )
 }

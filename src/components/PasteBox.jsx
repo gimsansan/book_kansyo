@@ -1,13 +1,19 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { parseShare } from '../lib/parseShare.js'
 import { addQuote } from '../lib/storage.js'
 
-export default function PasteBox() {
+export default function PasteBox({ initialRaw = '', label }) {
   const navigate = useNavigate()
-  const [raw, setRaw] = useState('')
-  const [draft, setDraft] = useState(null)
+  const [raw, setRaw] = useState(initialRaw)
+  const [draft, setDraft] = useState(initialRaw.trim() ? parseShare(initialRaw) : null)
   const [message, setMessage] = useState('')
+
+  useEffect(() => {
+    if (!message) return
+    const timer = setTimeout(() => setMessage(''), 3000)
+    return () => clearTimeout(timer)
+  }, [message])
 
   function onChange(value) {
     setRaw(value)
@@ -18,6 +24,10 @@ export default function PasteBox() {
   function onSave() {
     if (!draft || !draft.text.trim()) {
       setMessage('본문이 비어 있습니다.')
+      return
+    }
+    if (!draft.title.trim()) {
+      setMessage('제목을 입력하세요.')
       return
     }
     const result = addQuote({
@@ -39,7 +49,7 @@ export default function PasteBox() {
   return (
     <section className="panel">
       <label className="field">
-        <span>밀리의 서재에서 공유한 문구</span>
+        <span>{label ?? '밀리의 서재에서 공유한 문구'}</span>
         <textarea
           value={raw}
           rows={7}
@@ -53,7 +63,7 @@ export default function PasteBox() {
           <p className="hint">
             {draft.ok
               ? '책과 저자를 찾았습니다. 맞으면 저장하세요.'
-              : '형식을 못 찾았습니다. 제목을 직접 고칠 수 있습니다.'}
+              : '형식을 못 찾았습니다. 제목을 입력해야 저장할 수 있습니다.'}
           </p>
           <label className="field">
             <span>제목</span>
@@ -83,7 +93,12 @@ export default function PasteBox() {
               }
             />
           </label>
-          <button type="button" className="primary" onClick={onSave}>
+          <button
+            type="button"
+            className="primary"
+            onClick={onSave}
+            disabled={!draft.title.trim()}
+          >
             저장
           </button>
         </div>

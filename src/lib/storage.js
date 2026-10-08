@@ -5,6 +5,7 @@ const MOCK_FLAG = 'book-kansyo-mock-v1'
 
 const listeners = new Set()
 let snapshot = read()
+let writeError = ''
 
 function read() {
   try {
@@ -21,12 +22,23 @@ function read() {
   }
 }
 
+// 사파리 비공개 모드나 저장 공간 부족이면 setItem이 던진다.
+// 화면은 그대로 돌아가야 하므로, 실패했다는 사실만 남기고 넘어간다.
 function emit(next) {
   snapshot = next
   if (typeof localStorage !== 'undefined') {
-    localStorage.setItem(KEY, JSON.stringify(next))
+    try {
+      localStorage.setItem(KEY, JSON.stringify(next))
+      writeError = ''
+    } catch {
+      writeError = '브라우저 저장소에 쓰지 못했습니다. 지금 JSON으로 내보내 두세요.'
+    }
   }
   listeners.forEach((listener) => listener())
+}
+
+export function getWriteError() {
+  return writeError
 }
 
 export function subscribe(listener) {
@@ -91,19 +103,6 @@ export function orderedQuotes(quotes) {
   })
 }
 
-function stampPositions(quotes, bookId, pinnedLastId) {
-  const group = quotes.filter((quote) => quote.book_id === bookId)
-  const ordered = orderedQuotes(group.filter((quote) => quote.id !== pinnedLastId))
-  if (pinnedLastId) {
-    const pinned = group.find((quote) => quote.id === pinnedLastId)
-    if (pinned) ordered.push(pinned)
-  }
-  const rank = new Map(ordered.map((quote, index) => [quote.id, index]))
-  return quotes.map((quote) =>
-    rank.has(quote.id) ? { ...quote, position: rank.get(quote.id) } : quote,
-  )
-}
-
 export function listQuotesByBook(bookId) {
   return orderedQuotes(snapshot.quotes.filter((quote) => quote.book_id === bookId))
 }
@@ -124,8 +123,9 @@ export function addQuote({ title, author, text, raw }) {
     books: snapshot.books.map((book) => ({ ...book })),
     quotes: snapshot.quotes.map((quote) => ({ ...quote })),
   }
-  const nextTitle = title.trim() || '제목 없음'
+  const nextTitle = title.trim()
   const nextAuthor = author.trim()
+  if (!nextTitle) throw new Error('제목이 필요합니다.')
   const body = text.trim()
   let book = data.books.find(
     (item) => item.title === nextTitle && item.author === nextAuthor,
@@ -179,22 +179,6 @@ export function reorderQuotes(bookId, orderedIds) {
   emit({ books: snapshot.books, quotes })
 }
 
-export function moveQuoteToBook(quoteId, targetBookId) {
-  const current = snapshot.quotes.find((quote) => quote.id === quoteId)
-  if (!current || current.book_id === targetBookId) return
-  if (!snapshot.books.some((book) => book.id === targetBookId)) return
-
-  const sourceId = current.book_id
-  let quotes = snapshot.quotes.map((quote) =>
-    quote.id === quoteId ? { ...quote, book_id: targetBookId } : quote,
-  )
-  quotes = stampPositions(quotes, targetBookId, quoteId)
-  quotes = stampPositions(quotes, sourceId)
-  const used = new Set(quotes.map((quote) => quote.book_id))
-  const books = snapshot.books.filter((book) => used.has(book.id))
-  emit({ books, quotes })
-}
-
 export function updateQuote(id, patch) {
   const quotes = snapshot.quotes.map((quote) => {
     if (quote.id !== id) return quote
@@ -210,46 +194,31 @@ export function updateQuote(id, patch) {
 
 export function deleteQuote(id) {
   const quotes = snapshot.quotes.filter((quote) => quote.id !== id)
-  const used = new Set(quotes.map((quote) => quote.book_id))
-  const books = snapshot.books.filter((book) => used.has(book.id))
+  emit({ books: snapshot.books, quotes })
+}
+
+export function deleteBook(id) {
+  const books = snapshot.books.filter((book) => book.id !== id)
+  const quotes = snapshot.quotes.filter((quote) => quote.book_id !== id)
   emit({ books, quotes })
 }
 
+// 병합하지 않는다: 같은 제목·저자의 다른 책이 있으면 저장을 막는다
 export function updateBook(id, { title, author }) {
-  const nextTitle = title.trim() || '제목 없음'
+  const nextTitle = title.trim()
   const nextAuthor = author.trim()
+  if (!nextTitle) return { ok: false, error: '제목을 입력하세요.' }
   const other = snapshot.books.find(
     (book) =>
       book.id !== id && book.title === nextTitle && book.author === nextAuthor,
   )
-
-  if (other) {
-    const staying = orderedQuotes(
-      snapshot.quotes.filter((quote) => quote.book_id === other.id),
-    )
-    const moving = orderedQuotes(
-      snapshot.quotes.filter((quote) => quote.book_id === id),
-    )
-    const rank = new Map()
-    staying.forEach((quote, index) => rank.set(quote.id, index))
-    moving.forEach((quote, index) => rank.set(quote.id, staying.length + index))
-    const quotes = snapshot.quotes.map((quote) => {
-      if (quote.book_id === id) {
-        return { ...quote, book_id: other.id, position: rank.get(quote.id) }
-      }
-      if (rank.has(quote.id)) return { ...quote, position: rank.get(quote.id) }
-      return quote
-    })
-    const books = snapshot.books.filter((book) => book.id !== id)
-    emit({ books, quotes })
-    return other.id
-  }
+  if (other) return { ok: false, error: '같은 제목·저자의 책이 이미 있어요.' }
 
   const books = snapshot.books.map((book) =>
     book.id === id ? { ...book, title: nextTitle, author: nextAuthor } : book,
   )
   emit({ books, quotes: snapshot.quotes })
-  return id
+  return { ok: true }
 }
 
 export function searchQuotes(query) {

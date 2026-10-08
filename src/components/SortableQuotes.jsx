@@ -2,8 +2,6 @@ import {
   DndContext,
   PointerSensor,
   closestCenter,
-  pointerWithin,
-  useDroppable,
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
@@ -15,13 +13,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import QuoteItem from './QuoteItem.jsx'
-import { moveQuoteToBook, reorderQuotes } from '../lib/storage.js'
-
-function collisionDetection(args) {
-  const hits = pointerWithin(args)
-  if (hits.length > 0) return hits
-  return closestCenter(args)
-}
+import { reorderQuotes } from '../lib/storage.js'
 
 function SortableQuote({ quote }) {
   const {
@@ -51,35 +43,15 @@ function SortableQuote({ quote }) {
   )
 }
 
-function BookDrop({ book }) {
-  const { setNodeRef, isOver } = useDroppable({ id: `book:${book.id}` })
-  return (
-    <div
-      ref={setNodeRef}
-      role="group"
-      className={isOver ? 'move-target over' : 'move-target'}
-      aria-label={`${book.title}로 옮기기`}
-    >
-      <strong>{book.title}</strong>
-      <span>{book.author || '저자 없음'}</span>
-    </div>
-  )
-}
-
-export default function SortableQuotes({ bookId, quotes, otherBooks }) {
+// 같은 책 안에서 순서만 바꾼다 (다른 책으로 옮기기는 지원하지 않음)
+export default function SortableQuotes({ bookId, quotes }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
   )
 
   function onDragEnd(event) {
     const { active, over } = event
-    if (!over) return
-    const overId = String(over.id)
-    if (overId.startsWith('book:')) {
-      moveQuoteToBook(String(active.id), overId.slice(5))
-      return
-    }
-    if (active.id === over.id) return
+    if (!over || active.id === over.id) return
     const ids = quotes.map((quote) => quote.id)
     const from = ids.indexOf(active.id)
     const to = ids.indexOf(over.id)
@@ -87,38 +59,26 @@ export default function SortableQuotes({ bookId, quotes, otherBooks }) {
     reorderQuotes(bookId, arrayMove(ids, from, to))
   }
 
+  if (quotes.length === 0) {
+    return <p className="empty">저장된 문구가 없습니다.</p>
+  }
+
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={collisionDetection}
+      collisionDetection={closestCenter}
       onDragEnd={onDragEnd}
     >
-      {quotes.length === 0 ? (
-        <p className="empty">저장된 문구가 없습니다.</p>
-      ) : (
-        <SortableContext
-          items={quotes.map((quote) => quote.id)}
-          strategy={verticalListSortingStrategy}
-        >
-          <div className="quote-list">
-            {quotes.map((quote) => (
-              <SortableQuote key={quote.id} quote={quote} />
-            ))}
-          </div>
-        </SortableContext>
-      )}
-
-      {otherBooks.length > 0 && quotes.length > 0 && (
-        <section className="move-tray">
-          <h2>다른 책으로 묶기</h2>
-          <p className="hint">문구의 손잡이를 끌어 아래 책에 놓으세요.</p>
-          <div className="move-list">
-            {otherBooks.map((book) => (
-              <BookDrop key={book.id} book={book} />
-            ))}
-          </div>
-        </section>
-      )}
+      <SortableContext
+        items={quotes.map((quote) => quote.id)}
+        strategy={verticalListSortingStrategy}
+      >
+        <div className="quote-list">
+          {quotes.map((quote) => (
+            <SortableQuote key={quote.id} quote={quote} />
+          ))}
+        </div>
+      </SortableContext>
     </DndContext>
   )
 }

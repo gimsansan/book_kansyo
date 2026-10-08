@@ -1,0 +1,32 @@
+{
+  "id": "/",
+  "name": "북칸쇼 독서 노트",
+  "short_name": "북칸쇼",
+  "description": "밀리의 서재에서 공유한 문구를 책별로 모아 두는 독서 노트",
+  "lang": "ko",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f3eee6",
+  "theme_color": "#f3eee6",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "shortcuts": [
+    { "name": "문구 붙여넣기", "url": "/share", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "검색", "url": "/search", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

@@ -3,7 +3,7 @@ const CITE = /^<(.+?)>\s*,\s*(.+?)\s*-\s*밀리의 서재$/
 export function parseShare(raw) {
   const cleaned = String(raw ?? '').replace(/\r\n/g, '\n').trim()
   if (!cleaned) {
-    return { title: '제목 없음', author: '', text: '', ok: false }
+    return { title: '', author: '', text: '', ok: false }
   }
 
   const lines = cleaned.split('\n')
@@ -11,7 +11,7 @@ export function parseShare(raw) {
   const match = last.match(CITE)
 
   if (!match) {
-    return { title: '제목 없음', author: '', text: cleaned, ok: false }
+    return { title: '', author: '', text: cleaned, ok: false }
   }
 
   return {

@@ -27,10 +27,10 @@ describe('parseShare', () => {
     expect(result.title).toBe('어떤 책')
   })
 
-  it('형식이 아니면 전체를 본문으로 두고 제목 없음으로 둔다', () => {
+  it('형식이 아니면 전체를 본문으로 두고 제목은 비워 둔다', () => {
     const result = parseShare('그냥 메모입니다.')
     expect(result.ok).toBe(false)
-    expect(result.title).toBe('제목 없음')
+    expect(result.title).toBe('')
     expect(result.author).toBe('')
     expect(result.text).toBe('그냥 메모입니다.')
   })
