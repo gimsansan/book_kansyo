@@ -11,6 +11,17 @@ function formatDate(value) {
 
 const PAGE_SIZE = 5
 
+const SPINE_COLORS = [
+  '#8b2e1a', '#c9902a', '#5a7a5a', '#2a5a7a', '#7a2a5a',
+  '#4a6a3a', '#7a5a2a', '#2a4a7a', '#6a3a7a', '#3a6a5a',
+]
+
+function spineColor(id) {
+  let hash = 0
+  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0
+  return SPINE_COLORS[hash % SPINE_COLORS.length]
+}
+
 export default function BookList({ books }) {
   const [page, setPage] = useState(1)
 
@@ -32,6 +43,7 @@ export default function BookList({ books }) {
         {paged.map((book) => (
           <li key={book.id}>
             <Link to={`/book/${book.id}`}>
+              <span className="book-spine" style={{ background: spineColor(book.id) }} />
               <strong>{book.title}</strong>
               <span>{book.author || '저자 없음'}</span>
               <em>{book.quoteCount}개</em>

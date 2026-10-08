@@ -6,6 +6,7 @@ import {
   clearLibrary,
   getSnapshot,
   listBooks,
+  listFavoriteQuotes,
   listRecentQuotes,
   loadMock,
   mockIsActive,
@@ -17,6 +18,8 @@ export default function Home() {
   const books = listBooks()
   const recent = listRecentQuotes(5)
   const { quotes } = getSnapshot()
+  const favorites = listFavoriteQuotes()
+  const heroQuote = favorites[0] ?? recent[0] ?? null
 
   return (
     <div className="stack">
@@ -36,18 +39,55 @@ export default function Home() {
           </div>
         </section>
       )}
-      {books.length > 0 && (
-        <p className="hint stats">책 {books.length}권 · 문구 {quotes.length}개</p>
+
+      {/* 히어로 배너 */}
+      {heroQuote && (
+        <div className="hero-banner">
+          <div className="hero-label">
+            {favorites.length > 0 ? '★ 즐겨찾기 문구' : '최근 문구'}
+          </div>
+          <blockquote className="hero-quote">"{heroQuote.text}"</blockquote>
+          {heroQuote.book && (
+            <div className="hero-book">
+              <span className="hero-dot" />
+              {heroQuote.book.title}
+              {heroQuote.book.author ? ` · ${heroQuote.book.author}` : ''}
+            </div>
+          )}
+        </div>
       )}
+
+      {/* 통계 바 */}
+      {books.length > 0 && (
+        <div className="stats-bar">
+          <div className="stat-item">
+            <span className="stat-num">{books.length}</span>
+            <span className="stat-label">권의 책</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-num">{quotes.length}</span>
+            <span className="stat-label">개의 문구</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-num">{favorites.length}</span>
+            <span className="stat-label">즐겨찾기</span>
+          </div>
+        </div>
+      )}
+
       <PasteBox />
+
       <section>
         <h2>최근 문구</h2>
         <QuoteList quotes={recent} showBook />
+        {recent.length > 0 && <div className="ornament">✦ ✦ ✦</div>}
       </section>
+
       <section>
         <h2>책</h2>
         <BookList books={books} />
       </section>
+
       <BackupBox />
     </div>
   )
