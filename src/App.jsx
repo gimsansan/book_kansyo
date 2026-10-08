@@ -1,6 +1,7 @@
 import { NavLink, Route, Routes } from 'react-router-dom'
 import StorageNotice from './components/StorageNotice.jsx'
 import Book from './pages/Book.jsx'
+import Favorites from './pages/Favorites.jsx'
 import Home from './pages/Home.jsx'
 import Search from './pages/Search.jsx'
 import Share from './pages/Share.jsx'
@@ -14,6 +15,7 @@ export default function App() {
           <NavLink to="/" end>
             홈
           </NavLink>
+          <NavLink to="/favorites">★</NavLink>
           <NavLink to="/search">검색</NavLink>
         </nav>
       </header>
@@ -22,6 +24,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/book/:id" element={<Book />} />
+          <Route path="/favorites" element={<Favorites />} />
           <Route path="/search" element={<Search />} />
           <Route path="/share" element={<Share />} />
         </Routes>

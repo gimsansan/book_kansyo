@@ -80,6 +80,10 @@ button.text-button {
   justify-content: center;
 }
 
+button.star-button[aria-pressed="true"] {
+  color: var(--accent);
+}
+
 a {
   color: var(--accent);
   text-decoration: none;

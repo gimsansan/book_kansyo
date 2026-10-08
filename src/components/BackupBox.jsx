@@ -1,12 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { downloadBackup, getBackupState, markBackupDone } from '../lib/backup.js'
+import { downloadBackup, markBackupDone } from '../lib/backup.js'
 import { getSnapshot, importJson, mergeJson } from '../lib/storage.js'
 import { useLibrary } from '../lib/useLibrary.js'
-
-function lastBackupLabel(state) {
-  if (!state.at) return '아직 백업한 적이 없습니다. 기기를 잃으면 문구도 사라집니다.'
-  return `마지막 백업: ${state.at.slice(0, 10)} · 문구 ${state.count}개`
-}
 
 export default function BackupBox() {
   useLibrary()
@@ -65,10 +60,6 @@ export default function BackupBox() {
   return (
     <section className="panel backup">
       <h2>백업</h2>
-      <p className="hint">
-        기기끼리 자동으로 맞춰지지 않습니다. 다른 기기의 문구를 가져오려면 거기서
-        내보낸 파일을 <strong>합치기</strong>로 읽어 들이세요.
-      </p>
 
       <div className="row">
         <button type="button" onClick={onExport}>
@@ -87,17 +78,15 @@ export default function BackupBox() {
         onChange={onFile}
       />
 
-      <p className="hint">{lastBackupLabel(getBackupState())}</p>
-
       {askReplace ? (
         <div className="notice notice-alert">
           <p>
-            지금 있는 책과 문구 {getSnapshot().quotes.length}개를 모두 지우고 백업
-            파일의 내용으로 바꿉니다. 되돌릴 수 없습니다.
+            지금 있는 문구 {getSnapshot().quotes.length}개를 모두 삭제하고 백업 파일의
+            내용으로 완전히 교체합니다. 이 작업은 되돌릴 수 없습니다.
           </p>
           <div className="row">
             <button type="button" className="primary" onClick={() => pickFile('replace')}>
-              파일 고르고 덮어쓰기
+              모든 데이터 삭제하고 복원하기
             </button>
             <button type="button" onClick={() => setAskReplace(false)}>
               취소
@@ -106,7 +95,7 @@ export default function BackupBox() {
         </div>
       ) : (
         <button type="button" className="text-button" onClick={() => setAskReplace(true)}>
-          덮어쓰기 복원…
+          모든 데이터 삭제하고 복원…
         </button>
       )}
 

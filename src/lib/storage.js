@@ -118,6 +118,17 @@ export function listRecentQuotes(limit = 5) {
     }))
 }
 
+export function listFavoriteQuotes() {
+  const { books, quotes } = snapshot
+  return [...quotes]
+    .filter((quote) => quote.favorite === true)
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))
+    .map((quote) => ({
+      ...quote,
+      book: books.find((book) => book.id === quote.book_id) ?? null,
+    }))
+}
+
 export function addQuote({ title, author, text, raw }) {
   const data = {
     books: snapshot.books.map((book) => ({ ...book })),
@@ -162,6 +173,7 @@ export function addQuote({ title, author, text, raw }) {
     page: '',
     note: '',
     raw: raw ?? '',
+    favorite: false,
     position: siblings.length,
     created_at: now,
   }
@@ -187,6 +199,7 @@ export function updateQuote(id, patch) {
       ...(patch.page !== undefined ? { page: patch.page } : {}),
       ...(patch.note !== undefined ? { note: patch.note } : {}),
       ...(patch.text !== undefined ? { text: patch.text } : {}),
+      ...(patch.favorite !== undefined ? { favorite: patch.favorite } : {}),
     }
   })
   emit({ books: snapshot.books, quotes })
@@ -348,6 +361,7 @@ export function mergeJson(json) {
       page: incoming.page ?? '',
       note: incoming.note ?? '',
       raw: incoming.raw ?? '',
+      favorite: incoming.favorite === true,
       position,
       created_at: incoming.created_at ?? new Date().toISOString(),
     })

@@ -20,6 +20,7 @@ export default function QuoteItem({
 }) {
   const [page, setPage] = useState(quote.page || '')
   const [note, setNote] = useState(quote.note || '')
+  const [favorite, setFavorite] = useState(quote.favorite || false)
   const setHandleRef = dragHandle?.setActivatorNodeRef
 
   function savePage() {
@@ -28,6 +29,12 @@ export default function QuoteItem({
 
   function saveNote() {
     if (note !== (quote.note || '')) updateQuote(quote.id, { note })
+  }
+
+  function toggleFavorite() {
+    const next = !favorite
+    setFavorite(next)
+    updateQuote(quote.id, { favorite: next })
   }
 
   function onDelete() {
@@ -87,6 +94,15 @@ export default function QuoteItem({
             ⋮⋮
           </button>
         )}
+        <button
+          type="button"
+          className="text-button star-button"
+          aria-pressed={favorite}
+          onClick={toggleFavorite}
+          aria-label={favorite ? '즐겨찾기 해제' : '즐겨찾기'}
+        >
+          {favorite ? '★' : '☆'}
+        </button>
         <button type="button" className="text-button" onClick={onDelete}>
           삭제
         </button>
