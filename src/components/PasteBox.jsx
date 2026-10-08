@@ -52,7 +52,7 @@ export default function PasteBox({ initialRaw = '', initialDraft = null, label }
         <span>{label ?? '책에서 공유한 문구'}</span>
         <textarea
           value={raw}
-          rows={7}
+          rows={4}
           placeholder="공유 텍스트를 붙여넣으세요."
           onChange={(event) => onChange(event.target.value)}
         />
