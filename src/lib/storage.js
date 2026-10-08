@@ -244,8 +244,8 @@ export function updateBook(id, { title, author }) {
 }
 
 export function searchQuotes(query) {
-  const needle = query.trim().toLowerCase()
-  if (!needle) return []
+  const needles = query.trim().toLowerCase().split(/\s+/).filter(Boolean)
+  if (!needles.length) return []
   const { books, quotes } = snapshot
   return quotes
     .map((quote) => ({
@@ -254,12 +254,13 @@ export function searchQuotes(query) {
     }))
     .filter((item) => {
       const book = item.book
-      return (
-        item.text.toLowerCase().includes(needle) ||
-        (item.note || '').toLowerCase().includes(needle) ||
-        (book?.title || '').toLowerCase().includes(needle) ||
-        (book?.author || '').toLowerCase().includes(needle)
-      )
+      const haystack = [
+        item.text,
+        item.note || '',
+        book?.title || '',
+        book?.author || '',
+      ].join(' ').toLowerCase()
+      return needles.every((needle) => haystack.includes(needle))
     })
     .sort((a, b) => b.created_at.localeCompare(a.created_at))
 }

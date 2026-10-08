@@ -26,7 +26,24 @@ export default function BookList({ books }) {
   const [page, setPage] = useState(1)
 
   if (books.length === 0) {
-    return <p className="empty">아직 저장한 책이 없습니다.</p>
+    return (
+      <div className="empty-state">
+        <svg width="140" height="100" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="88" width="140" height="6" rx="3" fill="#e8d8c0"/>
+          <rect x="0" y="8" width="4" height="80" fill="#e8d8c0"/>
+          <rect x="136" y="8" width="4" height="80" fill="#e8d8c0"/>
+          <rect x="12" y="28" width="16" height="60" rx="2" fill="#e8d8c0" opacity="0.6"/>
+          <rect x="32" y="38" width="12" height="50" rx="2" fill="#e8d8c0" opacity="0.4"/>
+          <rect x="48" y="22" width="18" height="66" rx="2" fill="#e8d8c0" opacity="0.5"/>
+          <rect x="76" y="32" width="14" height="56" rx="2" fill="none" stroke="#e8d8c0" strokeWidth="1.5" strokeDasharray="4 3"/>
+          <rect x="96" y="20" width="18" height="68" rx="2" fill="none" stroke="#e8d8c0" strokeWidth="1.5" strokeDasharray="4 3"/>
+          <rect x="120" y="36" width="12" height="52" rx="2" fill="none" stroke="#e8d8c0" strokeWidth="1.5" strokeDasharray="4 3"/>
+          <text x="70" y="72" fontSize="18" fill="#c9902a" textAnchor="middle" opacity="0.5">✦</text>
+        </svg>
+        <p className="empty-state-title">아직 책이 없어요</p>
+        <p className="empty-state-desc">책에서 문구를 공유하면<br/>자동으로 책이 만들어집니다</p>
+      </div>
+    )
   }
 
   const totalPages = Math.ceil(books.length / PAGE_SIZE)
